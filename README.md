@@ -4,28 +4,44 @@
 
 Minimal Java Docker image focused on Java applications based on [Amazon Corretto](https://github.com/corretto/corretto-docker). It's use is intended for [kool.dev](https://github.com/kool-dev/kool), but can fit in any other Java use-case.
 
-Automatically load classpath in applications using **maven** or **gradle** architecture.
+Legacy images automatically load classpaths for Maven and Gradle applications. Modern images provide pinned Maven and Gradle toolchains without modifying project build files.
 
 ## Available Tags
 
 The image built is [`kooldev/java`](https://hub.docker.com/r/kooldev/java/tags?page=1&ordering=last_updated) which has a bunch of tags available:
 
-### 16
+### 25
+
+- [25](https://github.com/kool-dev/docker-java/blob/master/25/Dockerfile) and [25-prod](https://github.com/kool-dev/docker-java/blob/master/25-prod/Dockerfile)
+
+### 21
+
+- [21](https://github.com/kool-dev/docker-java/blob/master/21/Dockerfile) and [21-prod](https://github.com/kool-dev/docker-java/blob/master/21-prod/Dockerfile)
+
+### 17
+
+- [17](https://github.com/kool-dev/docker-java/blob/master/17/Dockerfile) and [17-prod](https://github.com/kool-dev/docker-java/blob/master/17-prod/Dockerfile)
+
+### Legacy versions
+
+The following versions remain available for compatibility but are not recommended for new projects. Java 15 and 16 are end-of-life (EOL) non-LTS releases and are no longer actively maintained.
+
+### 16 (EOL)
 
 - [16](https://github.com/kool-dev/docker-java/blob/master/16/Dockerfile)
 - [16-prod](https://github.com/kool-dev/docker-java/blob/master/16-prod/Dockerfile)
 
-### 15
+### 15 (EOL)
 
 - [15](https://github.com/kool-dev/docker-java/blob/master/15/Dockerfile)
 - [15-prod](https://github.com/kool-dev/docker-java/blob/master/15-prod/Dockerfile)
 
-### 11
+### 11 (Legacy LTS)
 
 - [11](https://github.com/kool-dev/docker-java/blob/master/11/Dockerfile)
 - [11-prod](https://github.com/kool-dev/docker-java/blob/master/11-prod/Dockerfile)
 
-### 8
+### 8 (Legacy LTS)
 
 - [8](https://github.com/kool-dev/docker-java/blob/master/8/Dockerfile)
 - [8-prod](https://github.com/kool-dev/docker-java/blob/master/8-prod/Dockerfile)
@@ -57,6 +73,8 @@ Variable | Default Value | Description
 **DEBUG_SUSPEND** | `n` | Suspend debug to waiting attached
 **CLASSPATH** | | Custom classpath, bay default defined by **maven** or **gradle** architecture 
 **MAIN_CLASS** | | Class main, required by execute 
+
+Modern images (`17`, `21`, and `25`) provide pinned Maven and Gradle versions and support AMD64 and ARM64. Mount Maven and Gradle caches at `/home/kool/.m2` and `/home/kool/.gradle`.
 
 ### PROD
 

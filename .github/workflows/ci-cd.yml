@@ -1,53 +1,79 @@
 name: CI/CD
 
-on: [push, workflow_dispatch]
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [8, 11, 15, 16]
-        type: ['', '-g5', '-g6', '-prod']
+        version: [17, 21, 25]
+        variant: ["", "-prod"]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1.6.0
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
         with:
-          path: /tmp/.buildx-cache
-          key: docker-buildx-${{ matrix.version }}${{ matrix.type }}-${{ github.sha }}
-          restore-keys: docker-buildx-${{ matrix.version }}${{ matrix.type }}-
+          driver: docker
 
-      - name: Build
-        run: |
-          docker buildx build \
-            --cache-from type=local,src=/tmp/.buildx-cache/${{ matrix.version }}${{ matrix.type }} \
-            --cache-to type=local,dest=/tmp/.buildx-cache/${{ matrix.version }}${{ matrix.type }} \
-            --output type=docker \
-            --tag kooldev/java:${{ matrix.version }}${{ matrix.type }} \
-            ${{ matrix.version }}${{ matrix.type }}
-      - name: Tests
-        run: |
-          docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} java -version
-          if [ -e ${{ matrix.type }} ]; then
-            docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} mvn -version
-            docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} gradle -version
-          fi
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1.10.0
-        if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+      - name: Build image
+        uses: docker/build-push-action@v6
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          context: ${{ matrix.version }}${{ matrix.variant }}
+          load: true
+          tags: kooldev/java:${{ matrix.version }}${{ matrix.variant }}
 
-      - name: Push to DockerHub
-        if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+      - name: Test Java runtime
         run: |
-          docker push kooldev/java:${{ matrix.version }}${{ matrix.type }}
+          docker run kooldev/java:${{ matrix.version }}${{ matrix.variant }} java -version
+          docker run -e ASUSER=1000 kooldev/java:${{ matrix.version }}${{ matrix.variant }} java -version
+
+      - name: Test development tools
+        if: matrix.variant == ''
+        run: |
+          docker run kooldev/java:${{ matrix.version }} mvn --version
+          docker run kooldev/java:${{ matrix.version }} gradle --version
+          docker run kooldev/java:${{ matrix.version }} jshell --version
+
+  publish:
+    if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+    needs: build-test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [17, 21, 25]
+        variant: ["", "-prod"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.version }}${{ matrix.variant }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: kooldev/java:${{ matrix.version }}${{ matrix.variant }}

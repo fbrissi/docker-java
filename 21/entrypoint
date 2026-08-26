@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+dockerize -template /kool/kool.tmpl:/kool/kool.vmoptions
+VM_OPTIONS=$(grep -Ev "^(#.*|.*=$)" /kool/kool.vmoptions | tr -s "\n" " ")
+
+CURRENT_USER=${ASUSER:-${UID:-0}}
+if [ -n "${CURRENT_USER}" ] && [ "${CURRENT_USER}" != "0" ]; then
+    usermod -u "${CURRENT_USER}" kool
+fi
+
+if [ -n "${ENTRYPOINT}" ] && [ -f "${ENTRYPOINT}" ]; then
+    bash "${ENTRYPOINT}"
+fi
+
+if [ "$#" -eq 0 ]; then
+    set -- sh
+fi
+
+case "$1" in
+    sh|bash|mvn|gradle|jshell)
+        exec su-exec kool "$@"
+        ;;
+    java)
+        shift
+        exec su-exec kool java ${VM_OPTIONS} ${JAVA_OPTIONS} "$@"
+        ;;
+esac
+
+exec su-exec kool "$@"

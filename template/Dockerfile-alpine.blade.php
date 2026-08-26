@@ -51,7 +51,7 @@ RUN adduser -D -u 1337 kool \
     && apk add --no-cache su-exec bash shadow tzdata \
 @unless ($prod)
        libc6-compat zip \
-    && ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2 \
+    && ln -sf /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2 \
     && mkdir -p /usr/lib/jvm/default-jvm/jre/lib/amd64/dcevm \
     && curl -L https://github.com/dcevm/dcevm/releases/download/light-jdk8u181%2B2/DCEVM-8u181-installer-build2.jar | bsdtar -xf- -C /tmp/ \
     && cp /tmp/linux_amd64_compiler2/product/libjvm.so /usr/lib/jvm/default-jvm/jre/lib/amd64/dcevm/libjvm.so \

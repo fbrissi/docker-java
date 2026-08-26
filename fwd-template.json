@@ -2,6 +2,96 @@
   "output": ".",
   "builds": [
     {
+      "name": "25",
+      "data": {
+        "from": "amazoncorretto:25-alpine-jdk",
+        "version": 25,
+        "gradleVersion": "9.1.0",
+        "mavenVersion": "3.9.11",
+        "prod": false
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "25-prod",
+      "data": {
+        "from": "amazoncorretto:25-alpine-jdk",
+        "version": 25,
+        "gradleVersion": "9.1.0",
+        "mavenVersion": "3.9.11",
+        "prod": true
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "21",
+      "data": {
+        "from": "amazoncorretto:21-alpine-jdk",
+        "version": 21,
+        "gradleVersion": "8.14.3",
+        "mavenVersion": "3.9.11",
+        "prod": false
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "21-prod",
+      "data": {
+        "from": "amazoncorretto:21-alpine-jdk",
+        "version": 21,
+        "gradleVersion": "8.14.3",
+        "mavenVersion": "3.9.11",
+        "prod": true
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "17",
+      "data": {
+        "from": "amazoncorretto:17-alpine-jdk",
+        "version": 17,
+        "gradleVersion": "8.14.3",
+        "mavenVersion": "3.9.11",
+        "prod": false
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "17-prod",
+      "data": {
+        "from": "amazoncorretto:17-alpine-jdk",
+        "version": 17,
+        "gradleVersion": "8.14.3",
+        "mavenVersion": "3.9.11",
+        "prod": true
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
       "name": "16-prod",
       "data": {
         "from": "amazoncorretto:16-alpine-jdk",
