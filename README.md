@@ -10,6 +10,10 @@ Legacy images automatically load classpaths for Maven and Gradle applications. M
 
 The image built is [`kooldev/java`](https://hub.docker.com/r/kooldev/java/tags?page=1&ordering=last_updated) which has a bunch of tags available:
 
+### 26
+
+- [26](https://github.com/kool-dev/docker-java/blob/master/26/Dockerfile) and [26-prod](https://github.com/kool-dev/docker-java/blob/master/26-prod/Dockerfile)
+
 ### 25
 
 - [25](https://github.com/kool-dev/docker-java/blob/master/25/Dockerfile) and [25-prod](https://github.com/kool-dev/docker-java/blob/master/25-prod/Dockerfile)
@@ -74,7 +78,7 @@ Variable | Default Value | Description
 **CLASSPATH** | | Custom classpath, bay default defined by **maven** or **gradle** architecture 
 **MAIN_CLASS** | | Class main, required by execute 
 
-Modern images (`17`, `21`, and `25`) provide pinned Maven and Gradle versions and support AMD64 and ARM64. Mount Maven and Gradle caches at `/home/kool/.m2` and `/home/kool/.gradle`.
+Modern images (`17`, `21`, `25`, and `26`) provide pinned Maven and Gradle versions and support AMD64 and ARM64. Mount Maven and Gradle caches at `/home/kool/.m2` and `/home/kool/.gradle`.
 
 ### PROD
 

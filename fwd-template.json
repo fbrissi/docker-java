@@ -2,6 +2,36 @@
   "output": ".",
   "builds": [
     {
+      "name": "26",
+      "data": {
+        "from": "amazoncorretto:26-alpine-jdk",
+        "version": 26,
+        "gradleVersion": "9.4.0",
+        "mavenVersion": "3.9.11",
+        "prod": false
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
+      "name": "26-prod",
+      "data": {
+        "from": "amazoncorretto:26-alpine-jdk",
+        "version": 26,
+        "gradleVersion": "9.4.0",
+        "mavenVersion": "3.9.11",
+        "prod": true
+      },
+      "files": [
+        { "name": "Dockerfile", "path": "template/Dockerfile-modern" },
+        { "name": "entrypoint", "path": "template/entrypoint-modern" },
+        { "name": "kool.vmoptions", "path": "template/kool-vmoptions-modern" }
+      ]
+    },
+    {
       "name": "25",
       "data": {
         "from": "amazoncorretto:25-alpine-jdk",

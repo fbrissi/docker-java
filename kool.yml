@@ -8,6 +8,8 @@ scripts:
     - docker build --pull -t kooldev/java:21-prod 21-prod
     - docker build --pull -t kooldev/java:25 25
     - docker build --pull -t kooldev/java:25-prod 25-prod
+    - docker build --pull -t kooldev/java:26 26
+    - docker build --pull -t kooldev/java:26-prod 26-prod
   build-legacy:
     # JAVA 16
     - docker build --platform linux/amd64 --pull -t kooldev/java:16 16
