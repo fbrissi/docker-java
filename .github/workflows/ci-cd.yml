@@ -17,14 +17,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1.6.0
 
+      - name: Check image directory
+        id: image-directory
+        run: |
+          if [ -d "${{ matrix.version }}${{ matrix.type }}" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Cache Docker layers
         uses: actions/cache@v2.1.6
+        if: steps.image-directory.outputs.exists == 'true'
         with:
           path: /tmp/.buildx-cache
           key: docker-buildx-${{ matrix.version }}${{ matrix.type }}-${{ github.sha }}
           restore-keys: docker-buildx-${{ matrix.version }}${{ matrix.type }}-
 
       - name: Build
+        if: steps.image-directory.outputs.exists == 'true'
         run: |
           docker buildx build \
             --cache-from type=local,src=/tmp/.buildx-cache/${{ matrix.version }}${{ matrix.type }} \
@@ -33,6 +44,7 @@ jobs:
             --tag kooldev/java:${{ matrix.version }}${{ matrix.type }} \
             ${{ matrix.version }}${{ matrix.type }}
       - name: Tests
+        if: steps.image-directory.outputs.exists == 'true'
         run: |
           docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} java -version
           if [ -e ${{ matrix.type }} ]; then
@@ -42,12 +54,12 @@ jobs:
 
       - name: Login to DockerHub
         uses: docker/login-action@v1.10.0
-        if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+        if: steps.image-directory.outputs.exists == 'true' && github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to DockerHub
-        if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+        if: steps.image-directory.outputs.exists == 'true' && github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
         run: |
           docker push kooldev/java:${{ matrix.version }}${{ matrix.type }}
