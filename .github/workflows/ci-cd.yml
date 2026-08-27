@@ -1,14 +1,37 @@
 name: CI/CD
 
-on: [push, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [8, 11, 15, 16, 17, 21, 25, 26]
-        type: ['', '-g5', '-g6', '-prod']
+        image:
+          - "8"
+          - "8-g5"
+          - "8-g6"
+          - "8-prod"
+          - "11"
+          - "11-g5"
+          - "11-g6"
+          - "11-prod"
+          - "15"
+          - "15-g5"
+          - "15-g6"
+          - "15-prod"
+          - "16"
+          - "16-g5"
+          - "16-g6"
+          - "16-prod"
+          - "17"
+          - "17-prod"
+          - "21"
+          - "21-prod"
+          - "25"
+          - "25-prod"
+          - "26"
+          - "26-prod"
 
     steps:
       - name: Checkout code
@@ -17,49 +40,77 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1.6.0
 
-      - name: Check image directory
-        id: image-directory
-        run: |
-          if [ -d "${{ matrix.version }}${{ matrix.type }}" ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Cache Docker layers
         uses: actions/cache@v2.1.6
-        if: steps.image-directory.outputs.exists == 'true'
         with:
           path: /tmp/.buildx-cache
-          key: docker-buildx-${{ matrix.version }}${{ matrix.type }}-${{ github.sha }}
-          restore-keys: docker-buildx-${{ matrix.version }}${{ matrix.type }}-
+          key: docker-buildx-${{ matrix.image }}-${{ github.sha }}
+          restore-keys: docker-buildx-${{ matrix.image }}-
 
       - name: Build
-        if: steps.image-directory.outputs.exists == 'true'
         run: |
           docker buildx build \
-            --cache-from type=local,src=/tmp/.buildx-cache/${{ matrix.version }}${{ matrix.type }} \
-            --cache-to type=local,dest=/tmp/.buildx-cache/${{ matrix.version }}${{ matrix.type }} \
+            --cache-from type=local,src=/tmp/.buildx-cache/${{ matrix.image }} \
+            --cache-to type=local,dest=/tmp/.buildx-cache/${{ matrix.image }} \
             --output type=docker \
-            --tag kooldev/java:${{ matrix.version }}${{ matrix.type }} \
-            ${{ matrix.version }}${{ matrix.type }}
+            --tag kooldev/java:${{ matrix.image }} \
+            ${{ matrix.image }}
       - name: Tests
-        if: steps.image-directory.outputs.exists == 'true'
         run: |
-          docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} java -version
-          if [ -e ${{ matrix.type }} ]; then
-            docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} mvn -version
-            docker run kooldev/java:${{ matrix.version }}${{ matrix.type }} gradle -version
+          docker run kooldev/java:${{ matrix.image }} java -version
+          if [[ "${{ matrix.image }}" != *-prod ]]; then
+            docker run kooldev/java:${{ matrix.image }} mvn -version
+            docker run kooldev/java:${{ matrix.image }} gradle -version
           fi
+
+  publish:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - "8"
+          - "8-g5"
+          - "8-g6"
+          - "8-prod"
+          - "11"
+          - "11-g5"
+          - "11-g6"
+          - "11-prod"
+          - "15"
+          - "15-g5"
+          - "15-g6"
+          - "15-prod"
+          - "16"
+          - "16-g5"
+          - "16-g6"
+          - "16-prod"
+          - "17"
+          - "17-prod"
+          - "21"
+          - "21-prod"
+          - "25"
+          - "25-prod"
+          - "26"
+          - "26-prod"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.3.4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
 
       - name: Login to DockerHub
         uses: docker/login-action@v1.10.0
-        if: steps.image-directory.outputs.exists == 'true' && github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to DockerHub
-        if: steps.image-directory.outputs.exists == 'true' && github.ref == 'refs/heads/main' && github.repository == 'kool-dev/docker-java'
+      - name: Build and push
         run: |
-          docker push kooldev/java:${{ matrix.version }}${{ matrix.type }}
+          docker buildx build \
+            --push \
+            --tag kooldev/java:${{ matrix.image }} \
+            ${{ matrix.image }}
